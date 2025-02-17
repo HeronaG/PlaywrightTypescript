@@ -2,7 +2,6 @@ import {test, expect } from "@playwright/test";
 import sharp from 'sharp';
 
 
-
 test.beforeEach(async ({ page}) => {
     await page.goto('https://hacktheicon.scramblerducati.com/');
     await page.getByRole('button', { name: 'Accept All Cookies' }).click();
@@ -10,11 +9,15 @@ test.beforeEach(async ({ page}) => {
     await page.getByRole('link', { name: 'Start to create' }).click();
     }); 
 
-    test('Test Text visible 1', async ({ page }) => {
+
+
+    test('Verify Text is visible ', async ({ page }) => {
 
         // Expect the following heading.
         await expect(page.getByRole('heading', { name: 'CREATE YOUR CUSTOM SCRAMBLER'})).toBeVisible();
       });
+
+
 
       test('Count images rendered', async ({ page }) => {
       await page.getByRole('button', { name: 'Generate', exact: true }).click();
@@ -32,18 +35,20 @@ test.beforeEach(async ({ page}) => {
         expect(motorcycleImages.length).toEqual(4)
     });
 
-    test('Download and Save image', async ({ page }) => {
+    
+
+    test('Download and verify image resoulationls', async ({ page }) => {
       await page.getByRole('button', { name: 'Generate', exact: true }).click();
     //Wait until Spinning Animated Scrabbler is enable.
     await page.getByRole('img', { name: 'Spinning animated Scrambler' }).isEnabled( {timeout: 15000 });
     await page.getByRole('img', { name: 'Spinning animated Scrambler' }).isDisabled({ timeout: 20000 });
     
-    // Wait until at least one image appears before proceeding
-      await page.waitForSelector('div.relative', { timeout: 25000 });
-     // Get all images in the 'relative'class
-            const motorcycleImages = await page.$$('div.relative');
+     // Wait until at least one image appears before proceeding
+     await page.waitForSelector('div.relative', { timeout: 25000 });
+     // Get all images in the 'relative'classes
+     const motorcycleImages = await page.$$('div.relative');
     
-            console.log(`Number of motorcycle images: ${motorcycleImages.length}`);
+     console.log(`Number of motorcycle images: ${motorcycleImages.length}`);
 
 
       await page.getByRole('textbox', { name: 'First Name' }).fill('tester');
@@ -61,31 +66,28 @@ test.beforeEach(async ({ page}) => {
       await page.getByRole('checkbox', { name: 'to understand your' }).click();
       await page.getByRole('button', { name: 'Submit' }).click();
 
-   const image = page.locator('img[src*="undefined_0"]').first();
-//await image.scrollIntoViewIfNeeded();
-await image.waitFor({ state: 'visible', timeout: 60000 });
-await image.click();
+      const image = page.locator('img[src*="undefined_0"]').first();
+      await image.waitFor({ state: 'visible', timeout: 60000 });
+      await image.click();
       
-await page.getByRole('button', { name: 'Next' }).click();
+      await page.getByRole('button', { name: 'Next' }).click();
 
 
- // Trigger the download and wait for the download event
-  const [download] = await Promise.all([
-  page.waitForEvent('download'),
-  page.getByRole('button', { name: 'DOWNLOAD' }).click()
-]);
+      // Trigger the download and wait for the download event
+      const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('button', { name: 'DOWNLOAD' }).click()
+      ]);
 
-await download.path();
+      await download.path();
 
-const uniqueFilename = `downloads/newimage_${Date.now()}.jpeg`;
-await download.saveAs(uniqueFilename);
+      const uniqueFilename = `downloads/newimage_${Date.now()}.jpeg`;
+      await download.saveAs(uniqueFilename);
 
-// Read the image metadata using sharp
-const metadata = await sharp(uniqueFilename).metadata();
+      // Read the image metadata using sharp
+      const metadata = await sharp(uniqueFilename).metadata();
 
-// Check that the resolution equals 2056 x 1368
-expect(metadata.width).toBe(2056);
-expect(metadata.height).toBe(1368);
-
-      
+      // Check that the resolution equals 2056 x 1368
+      expect(metadata.width).toBe(2056);
+      expect(metadata.height).toBe(1368);
   });
